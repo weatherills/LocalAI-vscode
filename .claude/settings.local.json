@@ -3,7 +3,10 @@
     "allow": [
       "Bash(dir node_modulesaxios)",
       "Bash(npm install)",
-      "Bash(npm run compile:*)"
+      "Bash(npm run compile:*)",
+      "Bash(npx @vscode/vsce package --allow-missing-repository)",
+      "Bash(dir:*)",
+      "Bash(test:*)"
     ]
   }
 }

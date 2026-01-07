@@ -13,8 +13,28 @@ export async function activate(context: vscode.ExtensionContext) {
         context.globalState.update('hasShownWelcome', true);
     }
 
-    // Initialize chat participant
-    new LocalAIChatParticipant(context);
+    // Initialize chat participant with error handling
+    try {
+        if (vscode.chat && typeof vscode.chat.createChatParticipant === 'function') {
+            new LocalAIChatParticipant(context);
+            console.log('LocalAI chat participant registered successfully');
+        } else {
+            console.error('VSCode Chat API not available. Chat participant not registered.');
+            vscode.window.showWarningMessage(
+                'LocalAI Chat: VSCode Chat API is not available. Please ensure you have VSCode version 1.90 or later with GitHub Copilot Chat enabled.',
+                'Learn More'
+            ).then(selection => {
+                if (selection === 'Learn More') {
+                    vscode.env.openExternal(vscode.Uri.parse('https://code.visualstudio.com/docs/copilot/copilot-chat'));
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Failed to register chat participant:', error);
+        vscode.window.showErrorMessage(
+            `LocalAI Chat registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+    }
 
     // Initialize completion provider
     registerCompletionProvider(context);
