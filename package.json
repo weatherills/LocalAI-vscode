@@ -141,6 +141,7 @@
     "typescript": "^5.3.x"
   },
   "dependencies": {
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "vsce": "^2.15.0"
   }
 }
