@@ -1,0 +1,146 @@
+{
+  "name": "localai-vscode",
+  "displayName": "LocalAI",
+  "description": "Chat with LocalAI and get code completions using your local AI models",
+  "version": "0.1.0",
+  "publisher": "localai",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weatherills/LocalAI-vscode"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "ai",
+    "chat",
+    "completion",
+    "localai",
+    "llm"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "LocalAI",
+      "properties": {
+        "localai.endpoint": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "LocalAI server endpoint URL"
+        },
+        "localai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for LocalAI authentication (if required)"
+        },
+        "localai.chatModel": {
+          "type": "string",
+          "default": "",
+          "description": "Model name for chat (leave empty to use default)"
+        },
+        "localai.completionModel": {
+          "type": "string",
+          "default": "",
+          "description": "Model name for code completion (leave empty to use default)"
+        },
+        "localai.maxTokens": {
+          "type": "number",
+          "default": 2048,
+          "description": "Maximum tokens for responses"
+        },
+        "localai.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Temperature for text generation"
+        },
+        "localai.enableCompletion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable inline code completion"
+        },
+        "localai.completionDelay": {
+          "type": "number",
+          "default": 500,
+          "minimum": 100,
+          "maximum": 5000,
+          "description": "Delay in milliseconds before triggering completion"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "localai.testConnection",
+        "title": "LocalAI: Test Connection"
+      },
+      {
+        "command": "localai.configureEndpoint",
+        "title": "LocalAI: Configure Endpoint"
+      },
+      {
+        "command": "localai.toggleCompletion",
+        "title": "LocalAI: Toggle Code Completion"
+      }
+    ],
+    "chatParticipants": [
+      {
+        "id": "localai.chat",
+        "name": "localai",
+        "description": "Chat with your local AI models",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "explain",
+            "description": "Explain the selected code"
+          },
+          {
+            "name": "fix",
+            "description": "Fix problems in the selected code"
+          },
+          {
+            "name": "optimize",
+            "description": "Optimize the selected code"
+          },
+          {
+            "name": "document",
+            "description": "Generate documentation for the selected code"
+          },
+          {
+            "name": "test",
+            "description": "Generate tests for the selected code"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.x",
+    "@typescript-eslint/parser": "^6.x",
+    "@vscode/test-electron": "^2.3.x",
+    "eslint": "^8.x",
+    "typescript": "^5.3.x"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
