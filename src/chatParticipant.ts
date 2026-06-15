@@ -48,21 +48,13 @@ export class LocalAIChatParticipant {
             }
 
             // Regular chat
-            let fullResponse = '';
-
-            for await (const chunk of this.client.chatStream(messages)) {
-                if (token.isCancellationRequested) {
-                    break;
-                }
-                fullResponse += chunk;
-                stream.markdown(chunk);
-            }
-
+            const response = await this.client.chat(messages);
+            stream.markdown(response);
             return { metadata: { command: request.command } };
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            stream.markdown(`\n\n⚠️ Error: ${errorMessage}`);
-            return { metadata: { command: request.command }, errorDetails: { message: errorMessage } };
+            console.error('Chat request failed:', error);
+            stream.markdown('⚠️ An error occurred while processing your request. Check the developer console for details.');
+            return { metadata: { command: request.command } };
         }
     }
 

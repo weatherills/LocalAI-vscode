@@ -47,6 +47,11 @@ export class LocalAIClient {
                 temperature: this.config.temperature || 0.7,
                 stream
             });
+            return response.data.choices[0].message.content;
+        } catch (error) {
+            console.error('LocalAI chat error:', error);
+            throw new Error('Failed to communicate with LocalAI server. Check your endpoint and network connection.');
+        }
 
             if (response.data.choices && response.data.choices.length > 0) {
                 return response.data.choices[0].message.content;

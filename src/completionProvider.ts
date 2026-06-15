@@ -17,12 +17,22 @@ export class LocalAICompletionProvider implements vscode.InlineCompletionItemPro
         });
     }
 
+    dispose() {
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+    }
+
     async provideInlineCompletionItems(
         document: vscode.TextDocument,
         position: vscode.Position,
         context: vscode.InlineCompletionContext,
         token: vscode.CancellationToken
     ): Promise<vscode.InlineCompletionItem[] | undefined> {
+        if (token.isCancellationRequested) {
+            return undefined;
+        }
+
         const config = vscode.workspace.getConfiguration('localai');
 
         // Check if completion is enabled
@@ -49,9 +59,9 @@ export class LocalAICompletionProvider implements vscode.InlineCompletionItemPro
             // Request completion
             const completion = await this.client.complete({
                 prompt,
-                maxTokens: 150,
-                temperature: 0.3,
-                stop: ['\n\n', '<|endoftext|>', '```']
+                maxTokens: config.get('maxTokens'),
+                temperature: config.get('temperature'),
+                stop: config.get('stopSequences')
             });
 
             if (token.isCancellationRequested || !completion) {

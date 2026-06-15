@@ -3,8 +3,33 @@ import { LocalAIChatParticipant } from './chatParticipant';
 import { registerCompletionProvider } from './completionProvider';
 import { getLocalAIClient } from './localaiClient';
 
+let disposables: vscode.Disposable[] = [];
+
+export function deactivate() {
+    console.log('LocalAI extension is now deactivated');
+    // Dispose of all resources
+    disposables.forEach(disposable => disposable.dispose());
+    disposables = [];
+}
+
+async function testConnection() {
+    try {
+        const client = getLocalAIClient();
+        const isConnected = await client.testConnection();
+        if (!isConnected) {
+            const endpoint = vscode.workspace.getConfiguration('localai').get('endpoint', 'http://localhost:8080');
+            vscode.window.showWarningMessage(
+                `⚠️ Cannot connect to LocalAI at ${endpoint}. Check your configuration.`
+            );
+        }
+    } catch (error) {
+        console.error('Connection test failed:', error);
+    }
+}
+
 export async function activate(context: vscode.ExtensionContext) {
     console.log('LocalAI extension is now active');
+    disposables.push(context.subscriptions);
 
     // Show welcome message on first activation
     const hasShownWelcome = context.globalState.get('hasShownWelcome', false);
@@ -16,7 +41,8 @@ export async function activate(context: vscode.ExtensionContext) {
     // Initialize chat participant with error handling
     try {
         if (vscode.chat && typeof vscode.chat.createChatParticipant === 'function') {
-            new LocalAIChatParticipant(context);
+            const chatParticipant = new LocalAIChatParticipant(context);
+            disposables.push(chatParticipant);
             console.log('LocalAI chat participant registered successfully');
         } else {
             console.error('VSCode Chat API not available. Chat participant not registered.');
@@ -37,17 +63,14 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     // Initialize completion provider
-    registerCompletionProvider(context);
+    const completionProvider = registerCompletionProvider(context);
+    disposables.push(completionProvider);
 
     // Register commands
     registerCommands(context);
 
     // Test connection on startup
     testConnection();
-}
-
-export function deactivate() {
-    console.log('LocalAI extension is now deactivated');
 }
 
 function registerCommands(context: vscode.ExtensionContext) {
@@ -118,31 +141,6 @@ function registerCommands(context: vscode.ExtensionContext) {
         configureEndpointCommand,
         toggleCompletionCommand
     );
-}
-
-async function testConnection() {
-    try {
-        const client = getLocalAIClient();
-        const isConnected = await client.testConnection();
-
-        if (!isConnected) {
-            const config = vscode.workspace.getConfiguration('localai');
-            const endpoint = config.get('endpoint', 'http://localhost:8080');
-
-            const action = await vscode.window.showWarningMessage(
-                `Cannot connect to LocalAI at ${endpoint}`,
-                'Configure',
-                'Ignore'
-            );
-
-            if (action === 'Configure') {
-                vscode.commands.executeCommand('localai.configureEndpoint');
-            }
-        }
-    } catch (error) {
-        // Silently fail on startup
-        console.error('LocalAI connection test failed:', error);
-    }
 }
 
 function showWelcomeMessage(context: vscode.ExtensionContext) {
